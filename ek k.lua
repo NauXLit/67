@@ -215,9 +215,9 @@ local Library do
         },
 
         Folders = {
-            Directory = "Disclosed",
-            Configs = "Disclosed/Configs",
-            Assets = "Disclosed/Assets"
+            Directory = "Nau",
+            Configs = "Nau/Configs",
+            Assets = "Nau/Assets"
         },
 
         Images = { -- you're welcome to reupload the images and replace it with your own links
@@ -4904,3 +4904,4 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
