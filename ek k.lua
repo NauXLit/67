@@ -2270,7 +2270,7 @@ local Library do
             SubPages = { },
             Elements = { },
 
-            IsOpen = true
+            IsOpen = false
         }
 
         local Items = { } do 
@@ -2278,7 +2278,7 @@ local Library do
                 Parent = Library.Holder.Instance,
                 AnchorPoint = Vector2New(0, 0),
                 Name = "\0",
-                Position = UDim2New(0, 0, 0, 0),
+                Position = UDim2New(0.5, 0, 0.5, 0),
                 BorderColor3 = FromRGB(10, 10, 10),
                 Size = Window.Size,
                 BorderSizePixel = 2,
@@ -4904,4 +4904,5 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
