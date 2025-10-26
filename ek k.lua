@@ -2285,8 +2285,8 @@ local Library do
                 BackgroundColor3 = FromRGB(15, 15, 20)
             })  Items["MainFrame"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
 
-            Items["MainFrame"].Instance.Position = UDim2.new(0.5, 0, 0.5, 0)
-            Items["MainFrame"].Instance.AnchorPoint = Vector2.new(0.5, 0.5)
+            Items["MainFrame"].Instance.Position = UDim2.new(0.5, 0, 0.7, 0)
+            Items["MainFrame"].Instance.AnchorPoint = Vector2.new(0.5, 0.7)
             Items["MainFrame"]:MakeResizeable(Vector2New(Window.Size.X.Offset, Window.Size.Y.Offset), Vector2New(9999, 9999))
             
             Items["AccentBorder"] = Instances:Create("UIStroke", {
@@ -4903,6 +4903,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
