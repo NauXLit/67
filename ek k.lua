@@ -2270,7 +2270,7 @@ local Library do
             SubPages = { },
             Elements = { },
 
-            IsOpen = false
+            IsOpen = true
         }
 
         local Items = { } do 
@@ -2278,16 +2278,15 @@ local Library do
                 Parent = Library.Holder.Instance,
                 AnchorPoint = Vector2New(0, 0),
                 Name = "\0",
-                Position = UDim2New(0.5, 0, 0.5, 0),
+                Position = UDim2New(0, 0, 0, 0),
                 BorderColor3 = FromRGB(10, 10, 10),
                 Size = Window.Size,
                 BorderSizePixel = 2,
                 BackgroundColor3 = FromRGB(15, 15, 20)
             })  Items["MainFrame"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
 
-            Items["MainFrame"].Instance.Position = UDim2New(0, Camera.ViewportSize.X / 4, 0, Camera.ViewportSize.Y / 4)
-
-            Items["MainFrame"]:MakeDraggable()
+            Items["MainFrame"].Instance.Position = UDim2.new(0.5, 0, 0.5, 0)
+            Items["MainFrame"].Instance.AnchorPoint = Vector2.new(0.5, 0.5)
             Items["MainFrame"]:MakeResizeable(Vector2New(Window.Size.X.Offset, Window.Size.Y.Offset), Vector2New(9999, 9999))
             
             Items["AccentBorder"] = Instances:Create("UIStroke", {
@@ -4904,5 +4903,6 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
