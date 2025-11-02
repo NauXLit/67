@@ -2288,7 +2288,7 @@ end
             Items["MainFrame"].Instance.Position = UDim2.new(0.5, 0, 0.45, 0)
             Items["MainFrame"].Instance.AnchorPoint = Vector2.new(0.5, 0.5)
             Items["MainFrame"]:MakeResizeable(Vector2New(Window.Size.X.Offset, Window.Size.Y.Offset), Vector2New(9999, 9999))
-            
+            Items["MainFrame"]:MakeDraggable()
             Items["AccentBorder"] = Instances:Create("UIStroke", {
                 Parent = Items["MainFrame"].Instance,
                 ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
@@ -4903,6 +4903,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
