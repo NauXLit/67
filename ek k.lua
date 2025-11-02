@@ -493,47 +493,47 @@ local Library do
         end
 
         Instances.MakeDraggable = function(self)
-            if not self.Instance then 
-                return
-            end
+    if not self.Instance then 
+        return
+    end
 
-            local Gui = self.Instance
+    local Gui = self.Instance
 
-            local Dragging = false 
-            local DragStart
-            local StartPosition 
+    local Dragging = false 
+    local DragStart
+    local StartPosition 
+    local DragInput 
+    local Set = function(Input)
+        local DragDelta = Input.Position - DragStart
+        self:Tween(TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Position = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + DragDelta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + DragDelta.Y)
+        })
+    end
 
-            local Set = function(Input)
-                local DragDelta = Input.Position - DragStart
-                self:Tween(TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2New(StartPosition.X.Scale, StartPosition.X.Offset + DragDelta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + DragDelta.Y)})
-            end
-
-            self:Connect("InputBegan", function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = true
-
-                    DragStart = Input.Position
-                    StartPosition = Gui.Position
-                end
-            end)
-
-            self:Connect("InputEnded", function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    Dragging = false
-                end
-            end)
-
-            Library:Connect(UserInputService.InputChanged, function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch then
-                    if Dragging then
-                        Set(Input)
-                    end
-                end
-            end)
-
-            return Dragging
+    self:Connect("InputBegan", function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            Dragging = true
+            DragStart = Input.Position
+            StartPosition = Gui.Position
+            DragInput = Input 
         end
+    end)
 
+    self:Connect("InputEnded", function(Input)
+        if Input == DragInput then
+            Dragging = false
+            DragInput = nil
+        end
+    end)
+
+    Library:Connect(UserInputService.InputChanged, function(Input)
+        if Dragging and Input == DragInput then -- Only update if it's the same input
+            Set(Input)
+        end
+    end)
+
+    return Dragging
+end
         Instances.MakeResizeable = function(self, Minimum, Maximum)
             if not self.Instance then 
                 return
@@ -4903,6 +4903,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
