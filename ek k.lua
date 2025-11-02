@@ -2374,7 +2374,7 @@ end
                 Name = "\0"
             }):AddToTheme({Color = "Outline"})
         end
-
+        _G.OnyxWindow = Window
         local Debounce = false
 
         function Window:SetOpen(Bool)
@@ -4903,6 +4903,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
