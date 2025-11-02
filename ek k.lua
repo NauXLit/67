@@ -651,9 +651,9 @@ end
     Library.NotifHolder = Instances:Create("Frame", {
         Parent = Library.Holder.Instance,
         BorderColor3 = FromRGB(0, 0, 0),
-        AnchorPoint = Vector2New(0.5, 0),
+        AnchorPoint = Vector2New(1, 0),
         BackgroundTransparency = 1,
-        Position = UDim2New(0.5, 0, 0, 0),
+        Position = UDim2New(1, -20, 0, 0),
         Name = "\0",
         Size = UDim2New(0.34, 0, 1, -14),
         BorderSizePixel = 0,
@@ -664,7 +664,7 @@ end
         Parent = Library.NotifHolder.Instance,
         VerticalAlignment = Enum.VerticalAlignment.Top,
         SortOrder = Enum.SortOrder.LayoutOrder,
-        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+        HorizontalAlignment = Enum.HorizontalAlignment.Right,
         Padding = UDimNew(0, 10)
     }) 
 
@@ -4903,6 +4903,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
