@@ -534,76 +534,127 @@ local Library do
 
     return Dragging
 end
-        Instances.MakeResizeable = function(self, Minimum, Maximum)
-            if not self.Instance then 
-                return
-            end
-
-            local Gui = self.Instance
-
-            local Resizing = false 
-            local Start = UDim2New()
-            local Delta = UDim2New()
-            local ResizeMax = Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
-
-            local ResizeButton = Instances:Create("TextButton", {
-				Parent = Gui,
-				AnchorPoint = Vector2New(1, 1),
-				BorderColor3 = FromRGB(0, 0, 0),
-				Size = UDim2New(0, 8, 0, 8),
-				Position = UDim2New(1, 0, 1, 0),
-                Name = "\0",
-				BorderSizePixel = 0,
-				BackgroundTransparency = 1,
-				AutoButtonColor = false,
-                Visible = true,
-                Text = ""
-			})
-
-            ResizeButton:Connect("InputBegan", function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    Resizing = true
-
-                    Start = Gui.Size - UDim2New(0, Input.Position.X, 0, Input.Position.Y)
-                end
-            end)
-
-            ResizeButton:Connect("InputEnded", function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    Resizing = false
-                end
-            end)
-
-            Library:Connect(UserInputService.InputChanged, function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch and Resizing then
-					ResizeMax = Maximum or Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
-
-					Delta = Start + UDim2New(0, Input.Position.X, 0, Input.Position.Y)
-					Delta = UDim2New(0, math.clamp(Delta.X.Offset, Minimum.X, ResizeMax.X), 0, math.clamp(Delta.Y.Offset, Minimum.Y, ResizeMax.Y))
-
-					Tween:Create(Gui, TweenInfo.new(0.17, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = Delta}, true)
-                end
-            end)
-
-            return Resizing
-        end
-
-        Instances.OnHover = function(self, Function)
-            if not self.Instance then 
-                return
-            end
-            
-            return Library:Connect(self.Instance.MouseEnter, Function)
-        end
-
-        Instances.OnHoverLeave = function(self, Function)
-            if not self.Instance then 
-                return
-            end
-            
-            return Library:Connect(self.Instance.MouseLeave, Function)
-        end
+ Instances.MakeResizeable = function(self, Minimum, Maximum)
+    if not self.Instance then 
+        return
     end
+
+    local Gui = self.Instance
+    local UIS = game:GetService("UserInputService")
+
+    local Resizing = false 
+    local Start = UDim2.new()
+    local Delta = UDim2.new()
+    local ResizeMax = Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
+
+    
+    local ResizeButton = Instances:Create("TextButton", {
+        Parent = Gui,
+        AnchorPoint = Vector2.new(1, 1),
+        BorderColor3 = FromRGB(0, 0, 0),
+        Size = UDim2.new(0, 10, 0, 10),
+        Position = UDim2.new(1, 0, 1, 0),
+        Name = "\0",
+        BorderSizePixel = 0,
+        BackgroundTransparency = 1,
+        AutoButtonColor = false,
+        Visible = true,
+        Text = ""
+    })
+
+    local function BeginResize(inputPos)
+        Resizing = true
+        Start = Gui.Size - UDim2.new(0, inputPos.X, 0, inputPos.Y)
+    end
+
+    local function EndResize()
+        Resizing = false
+    end
+
+    ResizeButton:Connect("InputBegan", function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            BeginResize(Input.Position)
+        end
+    end)
+
+    ResizeButton:Connect("InputEnded", function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            EndResize()
+        end
+    end)
+
+    
+    Library:Connect(UIS.InputChanged, function(Input)
+        if Resizing and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+            ResizeMax = Maximum or Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
+
+            Delta = Start + UDim2.new(0, Input.Position.X, 0, Input.Position.Y)
+            Delta = UDim2.new(
+                0, math.clamp(Delta.X.Offset, Minimum.X, ResizeMax.X),
+                0, math.clamp(Delta.Y.Offset, Minimum.Y, ResizeMax.Y)
+            )
+
+            Tween:Create(Gui, TweenInfo.new(0.17, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = Delta}, true)
+        end
+    end)
+
+    if not Minimum then
+        Minimum = Vector2.new(200, 150)
+    end
+
+    return Resizing
+end
+
+
+        
+Instances.OnHover = function(self, Callback)
+    if not self.Instance then 
+        return
+    end
+
+    local InputService = game:GetService("UserInputService")
+    Library:Connect(self.Instance.MouseEnter, function()
+        Callback(true, "MouseEnter")
+    end)
+
+    Library:Connect(self.Instance.MouseLeave, function()
+        Callback(false, "MouseLeave")
+    end)
+
+    if InputService.TouchEnabled then
+        Library:Connect(InputService.TouchStarted, function(Touch)
+            if Library:IsMouseOverFrame(self) then
+                Callback(true, "TouchStart", Touch)
+            end
+        end)
+
+        Library:Connect(InputService.TouchEnded, function(Touch)
+            Callback(false, "TouchEnd", Touch)
+        end)
+    end
+end
+
+
+Instances.OnHoverLeave = function(self, Callback)
+    if not self.Instance then 
+        return
+    end
+
+    local InputService = game:GetService("UserInputService")
+
+    
+    Library:Connect(self.Instance.MouseLeave, function()
+        Callback("MouseLeave")
+    end)
+
+    
+    if InputService.TouchEnabled then
+        Library:Connect(InputService.TouchEnded, function(Touch)
+            Callback("TouchEnd", Touch)
+        end)
+    end
+end
+
 
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
@@ -861,11 +912,11 @@ end
     end
 
     Library.SaveConfig = function(self, Config)
-        if isfile(Library.Folders.Directory .. "/" .. Library.Folders.Configs .. "/" .. Config .. ".json") then
-            writefile(Library.Folders.Directory .. "/" .. Library.Folders.Configs .. "/" .. Config .. ".json", Library:GetConfig())
-            Library:Notification("Saved config " .. Config .. ".json", 5, Color3.fromRGB(0, 255, 0))
-        end
+    if isfile(Library.Folders.Configs .. "/" .. Config .. ".json") then
+        writefile(Library.Folders.Configs .. "/" .. Config .. ".json", Library:GetConfig())
+        Library:Notification("Saved config " .. Config .. ".json", 5, Color3.fromRGB(0, 255, 0))
     end
+end
 
     Library.RefreshConfigsList = function(self, Element)
         local CurrentList = { }
@@ -917,13 +968,30 @@ end
     end
 
     Library.IsMouseOverFrame = function(self, Frame)
-        Frame = Frame.Instance
+    Frame = Frame.Instance
 
-        local MousePosition = Vector2New(Mouse.X, Mouse.Y)
-
-        return MousePosition.X >= Frame.AbsolutePosition.X and MousePosition.X <= Frame.AbsolutePosition.X + Frame.AbsoluteSize.X 
-        and MousePosition.Y >= Frame.AbsolutePosition.Y and MousePosition.Y <= Frame.AbsolutePosition.Y + Frame.AbsoluteSize.Y
+    local InputService = game:GetService("UserInputService")
+    local Position
+    if InputService.TouchEnabled and #InputService:GetTouches() > 0 then
+        local Touch = InputService:GetTouches()[1]
+        if Touch then
+            Position = Touch.Position
+        end
+    else
+        local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
+        Position = Vector2.new(Mouse.X, Mouse.Y)
     end
+
+    if not Position then
+        return false
+    end
+
+    return Position.X >= Frame.AbsolutePosition.X
+        and Position.X <= Frame.AbsolutePosition.X + Frame.AbsoluteSize.X
+        and Position.Y >= Frame.AbsolutePosition.Y
+        and Position.Y <= Frame.AbsolutePosition.Y + Frame.AbsoluteSize.Y
+end
+
 
     Library.Watermark = function(self, Name)
         local Watermark = { } 
@@ -4903,6 +4971,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
