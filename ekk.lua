@@ -534,59 +534,73 @@ local Library do
 
     return Dragging
 end
-        Instances.MakeResizeable = function(self, Minimum, Maximum)
-            if not self.Instance then 
-                return
-            end
+    Instances.MakeResizeable = function(self, Minimum, Maximum)
+    if not self.Instance then 
+        return
+    end
 
-            local Gui = self.Instance
+    local Gui = self.Instance
+    local UIS = game:GetService("UserInputService")
 
-            local Resizing = false 
-            local Start = UDim2New()
-            local Delta = UDim2New()
-            local ResizeMax = Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
+    local Resizing = false 
+    local Start = UDim2.new()
+    local Delta = UDim2.new()
+    local ResizeMax = Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
 
-            local ResizeButton = Instances:Create("TextButton", {
-				Parent = Gui,
-				AnchorPoint = Vector2New(1, 1),
-				BorderColor3 = FromRGB(0, 0, 0),
-				Size = UDim2New(0, 8, 0, 8),
-				Position = UDim2New(1, 0, 1, 0),
-                Name = "\0",
-				BorderSizePixel = 0,
-				BackgroundTransparency = 1,
-				AutoButtonColor = false,
-                Visible = true,
-                Text = ""
-			})
+    
+    local ResizeButton = Instances:Create("TextButton", {
+        Parent = Gui,
+        AnchorPoint = Vector2.new(1, 1),
+        BorderColor3 = FromRGB(0, 0, 0),
+        Size = UDim2.new(0, 10, 0, 10),
+        Position = UDim2.new(1, 0, 1, 0),
+        Name = "\0",
+        BorderSizePixel = 0,
+        BackgroundTransparency = 1,
+        AutoButtonColor = false,
+        Visible = true,
+        Text = ""
+    })
 
-            ResizeButton:Connect("InputBegan", function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    Resizing = true
+    local function BeginResize(inputPos)
+        Resizing = true
+        Start = Gui.Size - UDim2.new(0, inputPos.X, 0, inputPos.Y)
+    end
 
-                    Start = Gui.Size - UDim2New(0, Input.Position.X, 0, Input.Position.Y)
-                end
-            end)
+    local function EndResize()
+        Resizing = false
+    end
 
-            ResizeButton:Connect("InputEnded", function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                    Resizing = false
-                end
-            end)
-
-            Library:Connect(UserInputService.InputChanged, function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch and Resizing then
-					ResizeMax = Maximum or Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
-
-					Delta = Start + UDim2New(0, Input.Position.X, 0, Input.Position.Y)
-					Delta = UDim2New(0, math.clamp(Delta.X.Offset, Minimum.X, ResizeMax.X), 0, math.clamp(Delta.Y.Offset, Minimum.Y, ResizeMax.Y))
-
-					Tween:Create(Gui, TweenInfo.new(0.17, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = Delta}, true)
-                end
-            end)
-
-            return Resizing
+    
+    ResizeButton:Connect("InputBegan", function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            BeginResize(Input.Position)
         end
+    end)
+
+    ResizeButton:Connect("InputEnded", function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+            EndResize()
+        end
+    end)
+
+    Library:Connect(UIS.InputChanged, function(Input)
+        if Resizing and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+            ResizeMax = Maximum or Gui.Parent.AbsoluteSize - Gui.AbsoluteSize
+
+            Delta = Start + UDim2.new(0, Input.Position.X, 0, Input.Position.Y)
+            Delta = UDim2.new(
+                0, math.clamp(Delta.X.Offset, Minimum.X, ResizeMax.X),
+                0, math.clamp(Delta.Y.Offset, Minimum.Y, ResizeMax.Y)
+            )
+
+            Tween:Create(Gui, TweenInfo.new(0.17, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = Delta}, true)
+        end
+    end)
+
+    
+    return Resizing
+end
 
         Instances.OnHover = function(self, Function)
             if not self.Instance then 
@@ -4903,6 +4917,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
