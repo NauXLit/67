@@ -602,22 +602,56 @@ end
     return Resizing
 end
 
-        Instances.OnHover = function(self, Function)
-            if not self.Instance then 
-                return
-            end
-            
-            return Library:Connect(self.Instance.MouseEnter, Function)
-        end
-
-        Instances.OnHoverLeave = function(self, Function)
-            if not self.Instance then 
-                return
-            end
-            
-            return Library:Connect(self.Instance.MouseLeave, Function)
-        end
+Instances.OnHover = function(self, Callback)
+    if not self.Instance then 
+        return
     end
+
+    local InputService = game:GetService("UserInputService")
+
+    
+    Library:Connect(self.Instance.MouseEnter, function()
+        Callback(true, "MouseEnter")
+    end)
+
+    Library:Connect(self.Instance.MouseLeave, function()
+        Callback(false, "MouseLeave")
+    end)
+
+    
+    if InputService.TouchEnabled then
+        Library:Connect(InputService.TouchStarted, function(Touch)
+            if Library:IsMouseOverFrame(self) then
+                Callback(true, "TouchStart", Touch)
+            end
+        end)
+
+        Library:Connect(InputService.TouchEnded, function(Touch)
+            Callback(false, "TouchEnd", Touch)
+        end)
+    end
+end
+
+
+Instances.OnHoverLeave = function(self, Callback)
+    if not self.Instance then 
+        return
+    end
+
+    local InputService = game:GetService("UserInputService")
+
+
+    Library:Connect(self.Instance.MouseLeave, function()
+        Callback("MouseLeave")
+    end)
+
+    
+    if InputService.TouchEnabled then
+        Library:Connect(InputService.TouchEnded, function(Touch)
+            Callback("TouchEnd", Touch)
+        end)
+    end
+end
 
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
@@ -4917,6 +4951,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
