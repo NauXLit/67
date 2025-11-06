@@ -861,11 +861,12 @@ end
     end
 
     Library.SaveConfig = function(self, Config)
-        if isfile(Library.Folders.Directory .. "/" .. Library.Folders.Configs .. "/" .. Config .. ".json") then
-            writefile(Library.Folders.Directory .. "/" .. Library.Folders.Configs .. "/" .. Config .. ".json", Library:GetConfig())
-            Library:Notification("Saved config " .. Config .. ".json", 5, Color3.fromRGB(0, 255, 0))
-        end
+    if isfile(Library.Folders.Configs .. "/" .. Config .. ".json") then
+        writefile(Library.Folders.Configs .. "/" .. Config .. ".json", Library:GetConfig())
+        Library:Notification("Saved config " .. Config .. ".json", 5, Color3.fromRGB(0, 255, 0))
     end
+end
+
 
     Library.RefreshConfigsList = function(self, Element)
         local CurrentList = { }
@@ -4903,6 +4904,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
