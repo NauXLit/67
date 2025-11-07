@@ -618,7 +618,7 @@ Instances.OnHoverLeave = function(self, Function)
     return Library:Connect(self.Instance.MouseLeave, Function)
 end
 
-
+                    end
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
             if isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
@@ -4917,6 +4917,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
