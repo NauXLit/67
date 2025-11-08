@@ -874,37 +874,31 @@ end
 
     Library.SaveConfig = function(self, Config)
     if isfile(Library.Folders.Configs .. "/" .. Config .. ".json") then
-        writefile(Library.Folders.Configs .. "/" .. Config .. ".json", Library:GetConfig())
+        writefile(Library.Folders.Configs .. "/" .. (Config:gsub("%.json$", "")) .. ".json", Library:GetConfig())
+
         Library:Notification("Saved config " .. Config .. ".json", 5, Color3.fromRGB(0, 255, 0))
     end
 end
 
 
     Library.RefreshConfigsList = function(self, Element)
-        local CurrentList = { }
-        local List = { }
+    local List = {}
 
-        local ConfigFolderName = StringGSub(Library.Folders.Configs, Library.Folders.Directory .. "/", "")
+    -- ensure folder exists
+    if not isfolder(Library.Folders.Configs) then
+        makefolder(Library.Folders.Configs)
+    end
 
-        for Index, Value in listfiles(Library.Folders.Configs) do
-            local FileName = StringGSub(Value, Library.Folders.Directory .. "\\" .. ConfigFolderName .. "\\", "")
-            List[Index] = FileName
-        end
-
-        local IsNew = #List ~= CurrentList
-
-        if not IsNew then
-            for Index = 1, #List do
-                if List[Index] ~= CurrentList[Index] then
-                    IsNew = true
-                    break
-                end
-            end
-        else
-            CurrentList = List
-            Element:Refresh(CurrentList)
+    for _, FilePath in pairs(listfiles(Library.Folders.Configs)) do
+        local FileName = FilePath:match("([^/\\]+)$") -- extract only file name
+        if FileName and FileName:match("%.json$") then
+            table.insert(List, FileName)
         end
     end
+
+    Element:Refresh(List)
+end
+
 
     Library.ChangeItemTheme = function(self, Item, Properties)
         Item = Item.Instance or Item
@@ -4916,6 +4910,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
