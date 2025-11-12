@@ -607,25 +607,7 @@ Instances.OnHover = function(self, Function)
         return
     end
     
-    local connections = {}
-    
-    table.insert(connections, Library:Connect(self.Instance.MouseEnter, Function))
-    
-    table.insert(connections, Library:Connect(self.Instance.InputBegan, function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            Function()
-        end
-    end))
-    
-    return {
-        Disconnect = function()
-            for _, conn in ipairs(connections) do
-                if conn and conn.Disconnect then
-                    conn:Disconnect()
-                end
-            end
-        end
-    }
+    return Library:Connect(self.Instance.MouseEnter, Function)
 end
 
 Instances.OnHoverLeave = function(self, Function)
@@ -633,26 +615,10 @@ Instances.OnHoverLeave = function(self, Function)
         return
     end
     
-    local connections = {}
-    
-    table.insert(connections, Library:Connect(self.Instance.MouseLeave, Function))
-    
-    table.insert(connections, Library:Connect(self.Instance.InputEnded, function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            Function()
-        end
-    end))
-    
-    return {
-        Disconnect = function()
-            for _, conn in ipairs(connections) do
-                if conn and conn.Disconnect then
-                    conn:Disconnect()
-                end
-            end
-        end
-    }
-                                end
+    return Library:Connect(self.Instance.MouseLeave, Function)
+end
+
+                    end
     local CustomFont = { } do
         function CustomFont:New(Name, Weight, Style, Data)
             if isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
@@ -4944,6 +4910,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
