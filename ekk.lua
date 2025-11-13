@@ -2688,7 +2688,7 @@ end
 
         TableInsert(Page.Window.Pages, Page)
         return setmetatable(Page, Library.Pages)
-    end
+    
 
     Library.Pages.SubPage = function(self, Data)
         Data = Data or { }
@@ -4910,6 +4910,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
