@@ -209,8 +209,8 @@ local Library do
         MenuKeybind = Enum.KeyCode.Z, 
 
         Tween = {
-            Time = 0.3,
-            Style = Enum.EasingStyle.Exponential,
+            Time = 0.1,
+            Style = Enum.EasingStyle.Quad,
             Direction = Enum.EasingDirection.Out
         },
 
@@ -4910,6 +4910,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
