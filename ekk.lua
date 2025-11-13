@@ -2636,8 +2636,6 @@ end
 
     if Bool then 
         Items["Page"].Instance.Visible = true
-
-        -- Directly set the text properties
         Items["Text"].TextColor3 = Library.Theme.Accent
         Items["Text"].TextTransparency = 0
         Items["Hide"].Instance.Visible = true
@@ -2651,30 +2649,25 @@ end
         Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
     end
 
-    -- Set transparency for all descendants instantly
     local Descendants = Items["Page"].Instance:GetDescendants()
     table.insert(Descendants, Items["Page"].Instance)
 
     for _, Value in ipairs(Descendants) do 
-        local ValueIndex = Library:GetTransparencyPropertyFromItem(Value)
+        local Props = Library:GetTransparencyPropertyFromItem(Value)
 
-        if not ValueIndex then 
+        if not Props then 
             continue
         end
 
-        if type(ValueIndex) == "table" then
-            for _, Property in ipairs(ValueIndex) do 
-                if Bool then
-                    Value[Property] = 0
-                else
-                    Value[Property] = 1
-                end
-            end
-        else
+        if type(Props) ~= "table" then
+            Props = {Props}
+        end
+
+        for _, Property in ipairs(Props) do
             if Bool then
-                Value[ValueIndex] = 0
+                Value[Property] = 0
             else
-                Value[ValueIndex] = 1
+                Value[Property] = 1
             end
         end
     end
@@ -2682,6 +2675,7 @@ end
     Debounce = false
     Items["Page"].Instance.Visible = Bool
 end
+
 
         Items["Inactive"]:Connect("MouseButton1Down", function()
             for Index, Value in Page.Window.Pages do
@@ -4918,6 +4912,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
