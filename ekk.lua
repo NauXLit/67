@@ -3905,16 +3905,18 @@ end
         end
 
         Items["RealSlider"]:Connect("InputBegan", function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-                Slider.Sliding = true
+    if Input.UserInputType == Enum.UserInputType.MouseButton1 
+    or Input.UserInputType == Enum.UserInputType.Touch then
+        Slider.Sliding = true
 
-            local MousePos = IsMobile and Input.Position or UserInputService:GetMouseLocation()
+        local MousePos = IsMobile and Input.Position or UserInputService:GetMouseLocation()
 
-            local SizeX = (MousePos.X - Items["RealSlider"].Instance.AbsolutePosition.X) / Items["RealSlider"].Instance.AbsoluteSize.X
-            local Value = ((Slider.Max - Slider.Min) * SizeX) + Slider.Min
+        local SizeX = (MousePos.X - Items["RealSlider"].Instance.AbsolutePosition.X) / Items["RealSlider"].Instance.AbsoluteSize.X
+        local Value = ((Slider.Max - Slider.Min) * SizeX) + Slider.Min
 
-            Slider:Set(Value)
-        end)
+        Slider:Set(Value)
+    end  
+end)
 
         Items["RealSlider"]:Connect("InputEnded", function(Input)
             if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
@@ -4893,6 +4895,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
