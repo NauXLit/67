@@ -2627,53 +2627,61 @@ end
         local Debounce = false
 
         function Page:Turn(Bool)
-            if Debounce then 
-                return 
-            end
+    if Debounce then 
+        return 
+    end
 
-            Page.Active = Bool
+    Page.Active = Bool
+    Debounce = true 
 
-            Debounce = true 
+    if Bool then 
+        Items["Page"].Instance.Visible = true
 
-            if Bool then 
-                Items["Page"].Instance.Visible = true
+        -- Directly set the text properties
+        Items["Text"].TextColor3 = Library.Theme.Accent
+        Items["Text"].TextTransparency = 0
+        Items["Hide"].Instance.Visible = true
 
-                Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Accent, TextTransparency = 0})
-                Items["Hide"].Instance.Visible = true
+        Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
+    else
+        Items["Text"].TextColor3 = Library.Theme.Text
+        Items["Text"].TextTransparency = 0.5
+        Items["Hide"].Instance.Visible = false
 
-                Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
-            else
-                Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Text, TextTransparency = 0.5})
-                Items["Hide"].Instance.Visible = false
+        Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
+    end
 
-                Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
-            end
+    -- Set transparency for all descendants instantly
+    local Descendants = Items["Page"].Instance:GetDescendants()
+    table.insert(Descendants, Items["Page"].Instance)
 
-            local Descendants = Items["Page"].Instance:GetDescendants()
-            TableInsert(Descendants, Items["Page"].Instance)
+    for _, Value in ipairs(Descendants) do 
+        local ValueIndex = Library:GetTransparencyPropertyFromItem(Value)
 
-            local NewTween
-            for Index, Value in Descendants do 
-                local ValueIndex = Library:GetTransparencyPropertyFromItem(Value)
-
-                if not ValueIndex then 
-                    continue
-                end
-
-                if type(ValueIndex) == "table" then
-                    for _, Property in ValueIndex do 
-                        NewTween = Library:FadeItem(Value, Property, Bool, Page.Window.FadeSpeed or 0.5)
-                    end
-                else
-                    NewTween = Library:FadeItem(Value, ValueIndex, Bool, Page.Window.FadeSpeed or 0.5)
-                end
-            end
-
-            Library:Connect(NewTween.Tween.Completed, function()
-                Debounce = false
-                Items["Page"].Instance.Visible = Bool
-            end)
+        if not ValueIndex then 
+            continue
         end
+
+        if type(ValueIndex) == "table" then
+            for _, Property in ipairs(ValueIndex) do 
+                if Bool then
+                    Value[Property] = 0
+                else
+                    Value[Property] = 1
+                end
+            end
+        else
+            if Bool then
+                Value[ValueIndex] = 0
+            else
+                Value[ValueIndex] = 1
+            end
+        end
+    end
+
+    Debounce = false
+    Items["Page"].Instance.Visible = Bool
+end
 
         Items["Inactive"]:Connect("MouseButton1Down", function()
             for Index, Value in Page.Window.Pages do
@@ -4910,6 +4918,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
