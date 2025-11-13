@@ -2625,7 +2625,6 @@ end
         end
 
         local Debounce = false
-
         function Page:Turn(Bool)
     if Debounce then 
         return 
@@ -2639,13 +2638,11 @@ end
         Items["Text"].TextColor3 = Library.Theme.Accent
         Items["Text"].TextTransparency = 0
         Items["Hide"].Instance.Visible = true
-
         Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
     else
         Items["Text"].TextColor3 = Library.Theme.Text
         Items["Text"].TextTransparency = 0.5
         Items["Hide"].Instance.Visible = false
-
         Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
     end
 
@@ -2654,10 +2651,7 @@ end
 
     for _, Value in ipairs(Descendants) do 
         local Props = Library:GetTransparencyPropertyFromItem(Value)
-
-        if not Props then 
-            continue
-        end
+        if not Props then continue end
 
         if type(Props) ~= "table" then
             Props = {Props}
@@ -2672,6 +2666,7 @@ end
         end
     end
 
+    
     Debounce = false
     Items["Page"].Instance.Visible = Bool
 end
@@ -4912,6 +4907,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
