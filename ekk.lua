@@ -189,7 +189,7 @@ local Library do
     local StringFormat = string.format
     local StringFind = string.find
     local StringGSub = string.gsub
-
+    local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
     Library = {
         Flags = { },
         
@@ -209,8 +209,8 @@ local Library do
         MenuKeybind = Enum.KeyCode.Z, 
 
         Tween = {
-            Time = 0.3,
-            Style = Enum.EasingStyle.Exponential,
+            Time = 0.15,
+            Style = Enum.EasingStyle.Quad,
             Direction = Enum.EasingDirection.Out
         },
 
@@ -248,7 +248,8 @@ local Library do
         Font = nil,
         KeyList = nil,
 
-        CurrentColorpicker = nil
+        CurrentColorpicker = nil,
+        TweenCache = {}
     }
    
 
@@ -353,14 +354,17 @@ local Library do
         Tween.Create = function(self, Item, Info, Goal, IsRawItem)
             Item = IsRawItem and Item or Item.Instance
             Info = Info or TweenInfo.new(Library.Tween.Time, Library.Tween.Style, Library.Tween.Direction)
-
+            local CacheKey = tostring(Item)
+            if Library.TweenCache[CacheKey] then
+                Library.TweenCache[CacheKey]:Cancel()
+            end
             local NewTween = {
                 Tween = TweenService:Create(Item, Info, Goal),
                 Info = Info,
                 Goal = Goal,
                 Item = Item
             }
-
+            Library.TweenCache[CacheKey] = NewTween.Tween
             NewTween.Tween:Play()
 
             setmetatable(NewTween, Tween)
@@ -504,11 +508,14 @@ local Library do
     local StartPosition 
     local DragInput 
     local Set = function(Input)
-        local DragDelta = Input.Position - DragStart
-        self:Tween(TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-            Position = UDim2.new(StartPosition.X.Scale, StartPosition.X.Offset + DragDelta.X, StartPosition.Y.Scale, StartPosition.Y.Offset + DragDelta.Y)
-        })
-    end
+            local DragDelta = Input.Position - DragStart
+            Gui.Position = UDim2.new(
+                StartPosition.X.Scale, 
+                StartPosition.X.Offset + DragDelta.X, 
+                StartPosition.Y.Scale, 
+                StartPosition.Y.Offset + DragDelta.Y
+            )
+            end
 
     self:Connect("InputBegan", function(Input)
         if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
@@ -552,7 +559,7 @@ end
         Parent = Gui,
         AnchorPoint = Vector2.new(1, 1),
         BorderColor3 = FromRGB(0, 0, 0),
-        Size = UDim2.new(0, 10, 0, 10),
+        Size = UDim2.new(0, IsMobile and 20 or 10, 0, IsMobile and 20 or 10),
         Position = UDim2.new(1, 0, 1, 0),
         Name = "\0",
         BorderSizePixel = 0,
@@ -2385,37 +2392,37 @@ end
         local Debounce = false
 
         function Window:SetOpen(Bool)
-            if Debounce then 
-                return 
-            end
-
+            if Debounce then return end
             Window.IsOpen = Bool
-
             Debounce = true 
 
             if Bool then 
                 Items["MainFrame"].Instance.Visible = true
             end
 
+
             local Descendants = Items["MainFrame"].Instance:GetDescendants()
             TableInsert(Descendants, Items["MainFrame"].Instance)
 
-            local NewTween
             for Index, Value in Descendants do 
                 local ValueIndex = Library:GetTransparencyPropertyFromItem(Value)
-
-                if not ValueIndex then 
-                    continue
-                end
+                if not ValueIndex then continue end
 
                 if type(ValueIndex) == "table" then
                     for _, Property in ValueIndex do 
-                        NewTween = Library:FadeItem(Value, Property, Bool, Window.FadeSpeed)
+                        local CurrentTransparency = Value[Property]
+                        Value[Property] = Bool and CurrentTransparency or 1
                     end
                 else
-                    NewTween = Library:FadeItem(Value, ValueIndex, Bool, Window.FadeSpeed)
+                    local CurrentTransparency = Value[ValueIndex]
+                    Value[ValueIndex] = Bool and CurrentTransparency or 1
                 end
             end
+
+            task.wait(Window.FadeSpeed)
+            Debounce = false
+            Items["MainFrame"].Instance.Visible = Bool
+           end
 
             Library:Connect(NewTween.Tween.Completed, function()
                 Debounce = false
@@ -2627,26 +2634,18 @@ end
         local Debounce = false
 
         function Page:Turn(Bool)
-            if Debounce then 
-                return 
-            end
-
+            if Debounce then return end
             Page.Active = Bool
-
             Debounce = true 
 
-            if Bool then 
-                Items["Page"].Instance.Visible = true
+            Items["Page"].Instance.Visible = Bool
+            Items["Text"].Instance.TextColor3 = Bool and Library.Theme.Accent or Library.Theme.Text
+            Items["Text"].Instance.TextTransparency = Bool and 0 or 0.5
+            Items["Hide"].Instance.Visible = Bool
+            Items["Text"]:ChangeItemTheme({TextColor3 = Bool and "Accent" or "Text"})
 
-                Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Accent, TextTransparency = 0})
-                Items["Hide"].Instance.Visible = true
-
-                Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
-            else
-                Items["Text"]:Tween(nil, {TextColor3 = Library.Theme.Text, TextTransparency = 0.5})
-                Items["Hide"].Instance.Visible = false
-
-                Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
+            task.wait(Page.Window.FadeSpeed)
+            Debounce = false
             end
 
             local Descendants = Items["Page"].Instance:GetDescendants()
@@ -3490,7 +3489,7 @@ end
                 AutoButtonColor = false,
                 BackgroundTransparency = 1,
                 Name = "\0",
-                Size = UDim2New(1, 0, 0, 11),
+                Size = UDim2New(1, 0, 0, IsMobile and 15 or 11),
                 BorderSizePixel = 0,
                 TextSize = 14,
                 BackgroundColor3 = FromRGB(255, 255, 255)
@@ -3500,7 +3499,7 @@ end
                 Parent = Items["Toggle"].Instance,
                 Name = "\0",
                 BorderColor3 = FromRGB(10, 10, 10),
-                Size = UDim2New(0, 10, 0, 10),
+                Size = UDim2New(0, IsMobile and 14 or 10, 0, IsMobile and 14 or 10),
                 BorderSizePixel = 2,
                 BackgroundColor3 = FromRGB(33, 33, 36)
             })  Items["Indicator"]:AddToTheme({BackgroundColor3 = "Element", BorderColor3 = "Border"})
@@ -3675,7 +3674,7 @@ end
                 AutoButtonColor = false,
                 Name = "\0",
                 Position = UDim2New(0, 0, 1, 0),
-                Size = UDim2New(1, 0, 0, 17),
+                Size = UDim2New(1, 0, 0, IsMobile and 20 or 17),
                 Selectable = false,
                 BorderSizePixel = 2,
                 BackgroundColor3 = FromRGB(33, 33, 36)
@@ -3820,7 +3819,7 @@ end
                 BorderColor3 = FromRGB(10, 10, 10),
                 Text = "",
                 AutoButtonColor = false,
-                Size = UDim2New(1, 0, 0, 10),
+                Size = UDim2New(1, 0, 0, IsMobile and 14 or 10),
                 BorderSizePixel = 2,
                 BackgroundColor3 = FromRGB(33, 33, 36)
             })  Items["RealSlider"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
@@ -3922,10 +3921,11 @@ end
             Items["Slider"].Instance.Visible = Bool
         end
 
-        Items["RealSlider"]:Connect("MouseButton1Down", function()
-            Slider.Sliding = true
+        Items["RealSlider"]:Connect("InputBegan", function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+                Slider.Sliding = true
 
-            local MousePos = UserInputService:GetMouseLocation()
+            local MousePos = IsMobile and Input.Position or UserInputService:GetMouseLocation()
 
             local SizeX = (MousePos.X - Items["RealSlider"].Instance.AbsolutePosition.X) / Items["RealSlider"].Instance.AbsoluteSize.X
             local Value = ((Slider.Max - Slider.Min) * SizeX) + Slider.Min
@@ -4020,7 +4020,7 @@ end
                 Name = "\0",
                 Position = UDim2New(0, 0, 1, 0),
                 BorderColor3 = FromRGB(10, 10, 10),
-                Size = UDim2New(1, 0, 0, 17),
+                Size = UDim2New(1, 0, 0, IsMobile and 20 or 17),
                 BorderSizePixel = 2,
                 BackgroundColor3 = FromRGB(33, 33, 36)
             })  Items["RealDropdown"]:AddToTheme({BackgroundColor3 = "Background", BorderColor3 = "Border"})
@@ -4196,7 +4196,7 @@ end
                 Name = "\0",
                 BackgroundTransparency = 1,
                 BorderSizePixel = 0,
-                Size = UDim2New(1, 0, 0, 15),
+                Size = UDim2New(1, 0, 0, IsMobile and 18 or 15),
                 ZIndex = 5,
                 TextSize = 14,
                 BackgroundColor3 = FromRGB(255, 255, 255)
@@ -4540,7 +4540,7 @@ end
                 Name = "\0",
                 Position = UDim2New(0, 0, 1, 0),
                 BorderColor3 = FromRGB(10, 10, 10),
-                Size = UDim2New(1, 0, 0, 17),
+                Size = UDim2New(1, 0, 0, IsMobile and 20 or 17),
                 BorderSizePixel = 2,
                 BackgroundColor3 = FromRGB(33, 33, 36)
             })  Items["Background"]:AddToTheme({BackgroundColor3 = "Element", BorderColor3 = "Border"})
@@ -4794,7 +4794,7 @@ end
                 Name = "\0",
                 BackgroundTransparency = 1,
                 BorderSizePixel = 0,
-                Size = UDim2New(1, 0, 0, 15),
+                Size = UDim2New(1, 0, 0, IsMobile and 18 or 15),
                 ZIndex = 5,
                 TextSize = 14,
                 BackgroundColor3 = FromRGB(255, 255, 255)
@@ -4910,6 +4910,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
