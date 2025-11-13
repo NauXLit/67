@@ -348,42 +348,59 @@ local Library do
     end
 
     local Tween = { } do
-    Tween.__index = Tween
+        Tween.__index = Tween
 
-    Tween.Create = function(self, Item, Info, Goal, IsRawItem)
-        Item = IsRawItem and Item or Item.Instance
-        Info = Info or TweenInfo.new(Library.Tween.Time, Library.Tween.Style, Library.Tween.Direction)
+        Tween.Create = function(self, Item, Info, Goal, IsRawItem)
+            Item = IsRawItem and Item or Item.Instance
+            Info = Info or TweenInfo.new(Library.Tween.Time, Library.Tween.Style, Library.Tween.Direction)
 
-        local tween = TweenService:Create(Item, Info, Goal)
-        tween:Play()
+            local NewTween = {
+                Tween = TweenService:Create(Item, Info, Goal),
+                Info = Info,
+                Goal = Goal,
+                Item = Item
+            }
 
-        return tween
-    end
+            NewTween.Tween:Play()
 
-    Tween.Get = function(self)
-        return self, self.TweenInfo, self.TweenInfo and {[self.TweenInfo.PropertyName] = self.TweenInfo.Value}
-    end
+            setmetatable(NewTween, Tween)
 
-    Tween.Pause = function(self)
-        if self and self.PlaybackState == Enum.PlaybackState.Playing then 
-            self:Pause()
+            return NewTween
+        end
+
+        Tween.Get = function(self)
+            if not self.Tween then 
+                return
+            end
+
+            return self.Tween, self.Info, self.Goal
+        end
+
+        Tween.Pause = function(self)
+            if not self.Tween then 
+                return
+            end
+
+            self.Tween:Pause()
+        end
+
+        Tween.Play = function(self)
+            if not self.Tween then 
+                return
+            end
+
+            self.Tween:Play()
+        end
+
+        Tween.Clean = function(self)
+            if not self.Tween then 
+                return
+            end
+
+            Tween:Pause()
+            self = nil
         end
     end
-
-    Tween.Play = function(self)
-        if self and self.PlaybackState ~= Enum.PlaybackState.Playing then 
-            self:Play()
-        end
-    end
-
-    Tween.Clean = function(self)
-        if self then 
-            self:Cancel()
-            self:Destroy()
-        end
-    end
-    end
-
     local Instances = { } do
         Instances.__index = Instances
 
@@ -4869,6 +4886,7 @@ getgenv().Library = Library
 setfpscap(240)
 
 return Library
+
 
 
 
